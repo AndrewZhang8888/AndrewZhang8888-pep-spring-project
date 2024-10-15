@@ -1,7 +1,13 @@
 package com.example.controller;
 
 import com.example.entity.*;
+import com.example.service.*;
+import com.example.exception.*;
+
 import java.util.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -10,14 +16,31 @@ import org.springframework.web.bind.annotation.*;
  * where applicable as well as the @ResponseBody and @PathVariable annotations. You should
  * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
  */
+
+@RestController
 public class SocialMediaController {
+    MessageService msgServ;
+    AccountService accServ;
+
+    @Autowired
+    public SocialMediaController(MessageService msgServ, AccountService accServ){
+        this.msgServ = msgServ;
+        this.accServ = accServ;
+    }
+
     //User Story 1 POST;localhost_8080/register
     //Request Body
     @PostMapping("/register")
     @ResponseBody
-    public Account registerAccount(@RequestBody Account acct){
-        Account reg_acct = new Account();
-        return reg_acct;
+    public ResponseEntity<Account> registerAccount(@RequestBody Account acct){
+        try {
+            Account registeredAccount = accServ.registerUser(acct.getUsername(), acct.getPassword());
+            return ResponseEntity.status(200).body(registeredAccount);
+        } catch (DuplicateUsernameException e) {
+            return ResponseEntity.status(409).build();
+        } catch (InvalidRegistrationDataException e) {
+            return ResponseEntity.status(400).build();
+        }
     }
 
     //User Story 2 POST;localhost:8080/login
@@ -39,7 +62,7 @@ public class SocialMediaController {
     }
 
     //User Story 4 GET;localhost:8080/messages
-    @PostMapping("/messages")
+    @GetMapping("/messages")
     @ResponseBody
     public List<Message> getAllMessages(){
         List<Message> msg_list = new ArrayList<Message>();
@@ -48,7 +71,7 @@ public class SocialMediaController {
 
     //User Story 5 GET;localhost:8080/messages/{messageId}
     //PathVariable
-    @PostMapping("/messages/{messageId}")
+    @GetMapping("/messages/{messageId}")
     @ResponseBody
     public Message getMessageById(@PathVariable int messageId){
         Message msg = new Message();
