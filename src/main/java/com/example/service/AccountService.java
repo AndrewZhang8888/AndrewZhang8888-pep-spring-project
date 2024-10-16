@@ -34,7 +34,11 @@ public class AccountService {
 
     //User Story 2
     public Account findAccountByUsernameAndPass(String username, String password){
-        Account foundAcc = accRep.findByUsernameAndPassword(username, password).get();
-        return foundAcc;
-    }
+        Optional<Account> optionalAcc = accRep.findByUsernameAndPassword(username, password);
+        if(optionalAcc.isPresent()){
+            return optionalAcc.get();
+        } else{
+            return null;
+        }
+    }    
 }
